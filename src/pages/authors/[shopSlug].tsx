@@ -36,21 +36,17 @@ type ParsedQueryParams = {
   shopSlug: string;
 };
 
-export const getStaticPaths: GetStaticPaths<ParsedQueryParams> = async () => {
- 
+export const getStaticPaths: GetStaticPaths<ParsedQueryParams> = async ({
+  locales,
+}) => {
+  invariant(locales, 'locales is not defined');
   const { data } = await client.shops.all({ limit: 100, is_active: 1 });
 
-  
+  const paths = data?.flatMap((shop) =>
+    locales?.map((locale) => ({ params: { shopSlug: shop.slug }, locale }))
+  );
   return {
-    paths: [
-   
-    {
-      params: { shopSlug: shop.slug },
-      // with i18n configured the locale for the path can be returned as well
-      locale: "en",
-    },
-  ],
- 
+    paths,
     fallback: 'blocking',
   };
 };
